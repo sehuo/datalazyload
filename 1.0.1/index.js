@@ -243,7 +243,7 @@ KISSY.add(function (S, DOM, Event, Base, undefined) {
                 if (S.isWindow(el)) {
                     el = el.document;
                 } else {
-                    el = DOM.get(el);
+                    el = DOM.query(el);
                     if (DOM.nodeName(el) == 'body') {
                         el = el.ownerDocument;
                     }
@@ -298,16 +298,14 @@ KISSY.add(function (S, DOM, Event, Base, undefined) {
                 userConfig = self.userConfig,
                 container = self.get("container"),
                 _images = [],
-                _textareas = [],
-                containers = [container];
+                _textareas = [];
 
             // 兼容 1.2 传入数组，进入兼容模式，不检测 container 区域
-            if (S.isArray(userConfig.container)) {
+            if (container.length > 1) {
                 self._backCompact = 1;
-                containers = userConfig.container;
             }
 
-            S.each(containers, function (container) {
+            S.each(container, function (container) {
                 _images = _images.concat(S.filter(DOM.query('img', container), self['_filterImg'], self));
                 _textareas = _textareas.concat(DOM.query('textarea.' + AREA_DATA_CLS, container));
             });
@@ -390,18 +388,21 @@ KISSY.add(function (S, DOM, Event, Base, undefined) {
                 containerRegion,
                 container = self.get('container'),
                 windowRegion;
-            // container is display none
-            if (self._containerIsNotDocument && !container.offsetWidth) {
-                return;
-            }
-            windowRegion = self['_getBoundingRect']();
-            // 兼容，不检测 container
-            if (!self._backCompact && self._containerIsNotDocument) {
-                containerRegion = self['_getBoundingRect'](self.get('container'));
-            }
-            self['_loadImgs'](windowRegion, containerRegion);
-            self['_loadTextAreas'](windowRegion, containerRegion);
-            self['_fireCallbacks'](windowRegion, containerRegion);
+  
+            S.each(container,function(container){
+                // container is display none
+                if (self._containerIsNotDocument && !container.offsetWidth) {
+                    return;
+                }
+                windowRegion = self['_getBoundingRect']();
+                // 兼容，不检测 container
+                if (!self._backCompact && self._containerIsNotDocument) {
+                    containerRegion = self['_getBoundingRect'](self.get('container'));
+                }
+                self['_loadImgs'](windowRegion, containerRegion);
+                self['_loadTextAreas'](windowRegion, containerRegion);
+                self['_fireCallbacks'](windowRegion, containerRegion);
+            });
         },
 
         /**
